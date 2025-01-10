@@ -83,6 +83,28 @@ func (manager *FollowingClient) UnfollowUser(ctx context.Context, rel dto.Delete
 
 }
 
+func (manager *FollowingClient) purgeRelation(ctx context.Context, userId string) error {
+	session := manager.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer closeSession(&session)
+
+	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		query := `
+			MATCH (:User {id: $userId})-[relA: FOLLOWS]->(: User)
+			MATCH (:User)-[relB: FOLLOWS]->(: User {id : $userId})
+			DELETE relA
+			DELETE relB
+		`
+
+		params := map[string]interface{}{"userId": userId}
+
+		_, err := tx.Run(query, params)
+		return nil, err
+	})
+
+	return err
+
+}
+
 func (manager *FollowingClient) GetAllFollowers(ctx context.Context, userId string) ([]dto.User, error) {
 	session := manager.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer closeSession(&session)
@@ -166,10 +188,16 @@ func (manager *FollowingClient) GetAllFollowings(ctx context.Context, userId str
 }
 
 func (manager *FollowingClient) DeleteUser(ctx context.Context, userId string) error {
+
+	err := manager.purgeRelation(ctx, userId)
+	if err != nil {
+		return err
+	}
+
 	session := manager.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer closeSession(&session)
 
-	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		query := `
 			MATCH (user:User {id: $uid})
 			DELETE user
