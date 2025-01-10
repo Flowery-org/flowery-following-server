@@ -23,9 +23,9 @@ func Relation(router *gin.RouterGroup) {
 				c.JSON(500, err)
 			}
 
-			var rel dto.CreateRelation
-			err = json.Unmarshal(val, &rel)
-			rel.CreatedAt = strconv.FormatInt(time.Now().UnixMilli(), 10)
+			var createRel dto.CreateRelation
+			err = json.Unmarshal(val, &createRel)
+			createRel.CreatedAt = strconv.FormatInt(time.Now().UnixMilli(), 10)
 
 			if err != nil {
 				c.JSON(400, err)
@@ -33,7 +33,7 @@ func Relation(router *gin.RouterGroup) {
 
 			client := lib.GetNeo4jClientInstance()
 
-			err = client.Instance.FollowUser(c, rel)
+			err = client.Instance.FollowUser(c, createRel)
 			if err != nil {
 				c.JSON(400, err)
 			}
@@ -50,8 +50,8 @@ func Relation(router *gin.RouterGroup) {
 				c.JSON(500, err)
 			}
 
-			var rel dto.DeleteRelation
-			err = json.Unmarshal(val, &rel)
+			var delRel dto.DeleteRelation
+			err = json.Unmarshal(val, &delRel)
 
 			if err != nil {
 				c.JSON(400, err)
@@ -59,7 +59,7 @@ func Relation(router *gin.RouterGroup) {
 
 			client := lib.GetNeo4jClientInstance()
 
-			err = client.Instance.UnfollowUser(c, rel)
+			err = client.Instance.UnfollowUser(c, delRel)
 
 			if err != nil {
 				c.JSON(400, err)
@@ -69,6 +69,28 @@ func Relation(router *gin.RouterGroup) {
 				"ok": true,
 			})
 
+		})
+
+		rel.GET("/followers", func(c *gin.Context) {
+			userId := c.Query("userId")
+			client := lib.GetNeo4jClientInstance()
+
+			followers, err := client.Instance.GetAllFollowers(c, userId)
+			if err != nil {
+				c.JSON(400, err)
+			}
+			c.JSON(200, followers)
+		})
+
+		rel.GET("/followings", func(c *gin.Context) {
+			userId := c.Query("userId")
+			client := lib.GetNeo4jClientInstance()
+
+			followers, err := client.Instance.GetAllFollowings(c, userId)
+			if err != nil {
+				c.JSON(400, err)
+			}
+			c.JSON(200, followers)
 		})
 	}
 }

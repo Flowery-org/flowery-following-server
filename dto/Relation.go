@@ -11,3 +11,7 @@ type DeleteRelation struct {
 	FollowerId  string `json:"followerId"`
 	FollowingId string `json:"followingId"`
 }
+
+type GetAllRelations struct {
+	Id string `json:"id"`
+}
