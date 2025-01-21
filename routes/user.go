@@ -25,7 +25,7 @@ func User(router *gin.RouterGroup) {
 
 			err = json.Unmarshal(val, &user)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 
 			client := lib.GetNeo4jClientInstance()
@@ -33,7 +33,7 @@ func User(router *gin.RouterGroup) {
 			// Create User
 			err = client.Instance.CreateUser(c, user)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 
 			c.JSON(200, gin.H{
@@ -53,7 +53,7 @@ func User(router *gin.RouterGroup) {
 
 			err = json.Unmarshal(val, &user)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 
 			client := lib.GetNeo4jClientInstance()
@@ -61,7 +61,7 @@ func User(router *gin.RouterGroup) {
 			// Create User
 			err = client.Instance.DeleteUser(c, user.Id)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 
 			c.JSON(200, gin.H{

@@ -28,7 +28,7 @@ func Relation(router *gin.RouterGroup) {
 			createRel.CreatedAt = strconv.FormatInt(time.Now().UnixMilli(), 10)
 
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 
 			client := lib.GetNeo4jClientInstance()
@@ -77,7 +77,7 @@ func Relation(router *gin.RouterGroup) {
 
 			followers, err := client.Instance.GetAllFollowers(c, userId)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 			c.JSON(200, followers)
 		})
@@ -88,7 +88,7 @@ func Relation(router *gin.RouterGroup) {
 
 			followers, err := client.Instance.GetAllFollowings(c, userId)
 			if err != nil {
-				c.JSON(400, err)
+				c.JSON(500, err)
 			}
 			c.JSON(200, followers)
 		})
